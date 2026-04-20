@@ -5,7 +5,6 @@ from itertools import combinations
 import requests
 import networkx as nx
 
-
 class DataCollector:
     def __init__(self, topcis):
         self.topcis = topcis
@@ -67,7 +66,7 @@ class DataCollector:
                                 "id": a["author"]["id"]  # forfatter ID
                             }
                             for a in work.get("authorships", [])  # liste af forfattere
-                        ],
+                        ]
                     })
 
                 # gem data til JSON-fil
@@ -141,6 +140,7 @@ class DataCollector:
     def netwokCreator(self):
         input_file = f"edges_{self.topcis}.txt"
         output_dir = "networks"
+
         os.makedirs(output_dir, exist_ok=True)
 
         G = nx.Graph()
@@ -198,6 +198,8 @@ class DataCollector:
             self.edge_list()
 
 df = pd.read_csv("MetaData.csv")
-topic = df["id"][1]
+topic = df["id"][0]
+
+print(df.head())
 d = DataCollector(topic)
-d.getData()
+d.netwokCreator()

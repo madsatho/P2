@@ -29,6 +29,7 @@ class Topics:
         per_page = 200
 
         url = "https://api.openalex.org/works"
+
         params = {
             "filter": f"topics.id:{topic_id}",
             "per-page": per_page,
@@ -48,7 +49,7 @@ class Topics:
 
         return records
 
-    def anylise_topics(self):
+    def any_lise_topics(self):
         topics = self.finde_topics()
         rows = []
 
