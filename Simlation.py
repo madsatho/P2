@@ -1,4 +1,5 @@
 import networkx as nx
+import matplotlib.pyplot as plt
 import pandas as pd
 import os
 import random
@@ -32,14 +33,19 @@ class simulation:
 #-----------------------------------------------------------------------------------------
 
 class SIR:
-    def __init__(self, Graph, target, nodes):
+    def __init__(self, Graph, target, nodes, beta = 0.3, gamma = 0.1, initial_infected = 1, vax_eff = 0.999, vax_fraction = 0.05):
         self.graph = Graph
         self.target = target
         self.nodes = list(nodes)
-        self.n = int(0.05 * len(nodes))
+        self.beta = beta
+        self.gamma = gamma
+        self.initial_infected = initial_infected
+        self.vax_eff = vax_eff
+        self.vax_fraction = vax_fraction
 
     def random_infected(self, state, initial_infected):
-        infected = random.sample(list(self.graph.nodes()), initial_infected)
+        susceptible_nodes = [n for n in self.nodes if state[n] == "S"]
+        infected = random.sample(susceptible_nodes, initial_infected)
         for node in infected:
             state[node] = "I"
         return state
@@ -51,20 +57,21 @@ class SIR:
         else:
             return False
 
-    def SIR_sim(self, beta=0.3, gamma=0.1, initial_infected=1, random_infected=False, taget_infected=False):
+    def SIR_sim(self,  vacc_strategy="targeted"):
         state = {node: "S" for node in self.graph.nodes()}
+        n = int(self.vax_fraction * len(self.nodes))
 
-        if random_infected:
-            targets = set(random.sample(list(self.nodes), self.n))
-        elif taget_infected:
+        if vacc_strategy == "random":
+            targets = set(random.sample(self.nodes, n))
+        elif vacc_strategy == "targeted":
             targets = set(self.target)
         else:
-            targets = []
+            targets = set()
 
         for node in targets:
             state[node] = "V"
 
-        state = self.random_infected(state, initial_infected)
+        state = self.random_infected(state, self.initial_infected)
 
         history = []
         counter = 0
@@ -75,13 +82,13 @@ class SIR:
             for node in self.graph.nodes():
                 if state[node] == "I":
                     for neighbor in self.graph.neighbors(node):
-                        if state[neighbor] == "S" and random.random() < beta:
+                        if state[neighbor] == "S" and random.random() < self.beta:
                             new_state[neighbor] = "I"
 
-                        if state[neighbor] == "V" and random.random() < 0.01:
+                        if state[neighbor] == "V" and random.random() < (1-self.vax_eff):
                             new_state[neighbor] = "I"
 
-                    if random.random() < gamma:
+                    if random.random() < self.gamma:
                         new_state[node] = "R"
 
             state = new_state
@@ -99,86 +106,87 @@ class SIR:
 
 
 #-----------------------------------------------------------------------------------------------------
-
+#"network_0_T13370.txt"
 
 class run_SIR_Simulation:
-    def __init__(self,network):
+    def __init__(self,network, beta = 0.3, gamma = 0.1, initial_infected = 1, vax_eff = 0.999, vax_fraction = 0.05):
+        self.network = network
+        self.path = os.path.join("networks", network)
+        self.G = nx.read_edgelist(self.path)
+        self.nodes = self.G.nodes()
+        self.beta = beta
+        self.gamma = gamma
+        self.initial_infected = initial_infected
+        self.vax_eff = vax_eff
+        self.vax_fraction = vax_fraction
+
+
+    def run_simulation(self, target=None, mode="targeted"):
+        top = []
+
+        for i in range(30):
+            sir = SIR(Graph=self.G, target=target, nodes=self.nodes, beta=self.beta, gamma=self.gamma, initial_infected=self.initial_infected)
+
+            if mode == "targeted":
+                history = sir.SIR_sim(vacc_strategy="targeted")
+            elif mode == "random":
+                history = sir.SIR_sim(vacc_strategy="random")
+            elif mode == "none":
+                history = sir.SIR_sim()
+            else:
+                raise ValueError("Invalid mode")
+
+            I = [state[1] for state in history]
+            top.append(max(I))
+
+            if i % 10 == 0:
+                print(f"simulation {i}")
+
+        return top
+
+    def results(self, Save=False):
+        sim = simulation(self.G, self.nodes, self.network)
+
+        strategies = {
+            "DegreeTargeted": ("targeted", sim.finde_Vax_target(NumNeighbors=True)),
+            "BetweennessTargeted": ("targeted", sim.finde_Vax_target(Betweenness=True)),
+            "PageRankTargeted": ("targeted", sim.finde_Vax_target(PageRank=True)),
+            "RandomVaccination": ("random", []),
+            "NoVaccination": ("none", [])
+        }
+
+        results = {}
+
+        for name, (mode, target) in strategies.items():
+            print(f"Running {name}")
+            results[name] = self.run_simulation(target=target, mode=mode)
+
+
+        df = pd.DataFrame(results)
+        if Save:
+            df.to_csv(f"SIR_results_{self.network}.csv", index=False)
+        print((df.describe(exclude="count",)).T)
+        df.boxplot()
+        plt.show()
+
+#--------------------------------------------------------------------------------------------------
+
+class SimSandBox:
+    def __init__(self, network):
         self.network = network
         self.path = os.path.join("networks", network)
         self.G = nx.read_edgelist(self.path)
         self.nodes = self.G.nodes()
 
-    def peak_sim(self,target):
-        top = []
-
-        for i in range(100):
-            sir = SIR(Graph=self.G, target=target, nodes=self.nodes)
-            history = sir.SIR_sim(beta=0.3, gamma=0.1, taget_infected=True)
-
-            I = [state[1] for state in history]
-            top.append(max(I))
-
-            if i % 10 == 0:
-                print(f"simulation {i}")
-
-        return top
-
-    def idk(self, target):
-        top = []
-
-        for i in range(100):
-            sir = SIR(Graph=self.G, target=target, nodes=self.nodes)
-            history = sir.SIR_sim(beta=0.3, gamma=0.1, random_infected=True)
-
-            I = [state[1] for state in history]
-            top.append(max(I))
-
-            if i % 10 == 0:
-                print(f"simulation {i}")
-
-        return top
-
-    def idk2(self, target):
-        top = []
-
-        for i in range(100):
-            sir = SIR(Graph=self.G, target=target, nodes=self.nodes)
-            history = sir.SIR_sim(beta=0.3, gamma=0.1)
-
-            I = [state[1] for state in history]
-            top.append(max(I))
-
-            if i % 10 == 0:
-                print(f"simulation {i}")
-
-        return top
-
-    def results(self):
-        sim = simulation(self.G, self.nodes, self.network)
-
-        targets = {
-            "NumNeighbors": sim.finde_Vax_target(NumNeighbors=True),
-            "Betweenness": sim.finde_Vax_target(Betweenness=True),
-            "PageRank": sim.finde_Vax_target(PageRank=True),
-            "NormSIM": [],
-            "TestSIM": []
-        }
-
-        results = {}
-
-        for name, vax_target in targets.items():
-            print(f"Running {name}")
-
-            if name == "NormSIM":
-                results[name] = self.idk(vax_target)
-            elif name == "TestSIM":
-                results[name] = self.idk2(vax_target)
-            else:
-                results[name] = self.peak_sim(vax_target)
+    def SandBox(self):
+        run = run_SIR_Simulation(self.network,initial_infected=10,beta=0.10)
+        run.results()
 
 
-        df = pd.DataFrame(results)
-        df.to_csv("SIR_results.csv", index=False)
+box = SimSandBox("network_0_T13370.txt")
+box.SandBox()
 
-run = run_SIR_Simulation("network_0_T13370.txt")
-run.results()
+
+
+
+
