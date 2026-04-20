@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import random
 import os
 
-
 class SIR:
     def __init__(self,number):
         self.Number = number
@@ -22,7 +21,7 @@ class SIR:
     def is_infected(self, state):
         if any(node == "I" for node in state.values()):
             return True
-        elif all(s == "I" for s in state.values()):
+        elif all(node == "I" for node in state.values()):
             return False
         elif all(s != "I" for s in state.values()):
             return False
@@ -69,13 +68,12 @@ def plotSIR(S, I, R):
     plt.legend()
     plt.show()
 
-path = os.path.join("networks", "network_0.txt")
+path = os.path.join("networks", "network_0_T14423.txt")
 G = nx.read_edgelist(path)
 
 sir = SIR(number=0)
-history = sir.sir_simulation(G, random_infected=True)
 
+history = sir.sir_simulation(G, random_infected=True,initial_infected=1)
 S, I, R = zip(*history)
+
 plotSIR(S, I, R)
-
-
