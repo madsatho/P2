@@ -13,7 +13,8 @@ class simulation:
         self.n        =  int(0.05 * len(nodes))
 
     def finde_Vax_target(self, NumNeighbors=False, Betweenness=False, PageRank=False):
-        df = pd.read_csv(f"Stat_{self.graph_id}.csv")
+        stat_location=os.path.join("..", "MetaData(csv og txt)",f"Stat_{self.graph_id}.csv")
+        df = pd.read_csv(stat_location)
 
         n = int(0.05 * len(self.nodes))
 
@@ -111,7 +112,7 @@ class SIR:
 class run_SIR_Simulation:
     def __init__(self,network, beta = 0.3, gamma = 0.1, initial_infected = 1, vax_eff = 0.999, vax_fraction = 0.05):
         self.network = network
-        self.path = os.path.join("networks", network)
+        self.path = os.path.join("..","MetaData(csv og txt)","networks", network)
         self.G = nx.read_edgelist(self.path)
         self.nodes = self.G.nodes()
         self.beta = beta
@@ -165,7 +166,7 @@ class run_SIR_Simulation:
         df = pd.DataFrame(results)
         if Save:
             df.to_csv(f"SIR_results_{self.network}.csv", index=False)
-        print((df.describe(exclude="count",)).T)
+        print(df.describe().drop("count").T)
         df.boxplot()
         plt.show()
 
@@ -174,7 +175,7 @@ class run_SIR_Simulation:
 class SimSandBox:
     def __init__(self, network):
         self.network = network
-        self.path = os.path.join("networks", network)
+        self.path = os.path.join("..","MetaData(csv og txt)","networks", network)
         self.G = nx.read_edgelist(self.path)
         self.nodes = self.G.nodes()
 
