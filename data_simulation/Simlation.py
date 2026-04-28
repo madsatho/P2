@@ -16,7 +16,6 @@ class simulation:
         stat_location=os.path.join("..", "MetaData(csv og txt)",f"Stat_{self.graph_id}.csv")
         df = pd.read_csv(stat_location)
 
-        n = int(0.05 * len(self.nodes))
 
         if NumNeighbors:
             sorted_df = df.sort_values(by="NumNeighbors", ascending=False)
@@ -27,14 +26,14 @@ class simulation:
         else:
             raise ValueError("Choose a method")
 
-        top_nodes = sorted_df.head(n)["Node"].tolist()
+        top_nodes = sorted_df["Node"].tolist()
 
         return top_nodes
 
 #-----------------------------------------------------------------------------------------
 
 class SIR:
-    def __init__(self, Graph, target, nodes, beta = 0.3, gamma = 0.1, initial_infected = 1, vax_eff = 0.999, vax_fraction = 0.05):
+    def __init__(self, Graph, target, nodes, beta = 0.3, gamma = 0.1, initial_infected = 1, vax_eff = 0.0, vax_fraction = 0.00):
         self.graph = Graph
         self.target = target
         self.nodes = list(nodes)
@@ -60,12 +59,12 @@ class SIR:
 
     def SIR_sim(self,  vacc_strategy="targeted"):
         state = {node: "S" for node in self.graph.nodes()}
-        n = int(self.vax_fraction * len(self.nodes))
+        n = round(self.vax_fraction * len(self.nodes))
 
         if vacc_strategy == "random":
             targets = set(random.sample(self.nodes, n))
         elif vacc_strategy == "targeted":
-            targets = set(self.target)
+            targets = set(self.target[:n])
         else:
             targets = set()
 
@@ -83,10 +82,10 @@ class SIR:
             for node in self.graph.nodes():
                 if state[node] == "I":
                     for neighbor in self.graph.neighbors(node):
+
                         if state[neighbor] == "S" and random.random() < self.beta:
                             new_state[neighbor] = "I"
-
-                        if state[neighbor] == "V" and random.random() < (1-self.vax_eff):
+                        elif state[neighbor] == "V" and random.random() < self.beta * (1 - self.vax_eff):
                             new_state[neighbor] = "I"
 
                     if random.random() < self.gamma:
@@ -110,7 +109,7 @@ class SIR:
 #"network_0_T13370.txt"
 
 class run_SIR_Simulation:
-    def __init__(self,network, beta = 0.3, gamma = 0.1, initial_infected = 1, vax_eff = 0.999, vax_fraction = 0.05):
+    def __init__(self,network, beta = 0.3, gamma = 0.1, initial_infected = 1, vax_eff = 0.0, vax_fraction = 0.00):
         self.network = network
         self.path = os.path.join("..","MetaData(csv og txt)","networks", network)
         self.G = nx.read_edgelist(self.path)
@@ -180,7 +179,7 @@ class SimSandBox:
         self.nodes = self.G.nodes()
 
     def SandBox(self):
-        run = run_SIR_Simulation(self.network,gamma=0.05,initial_infected=10,beta=0.10)
+        run = run_SIR_Simulation(self.network,beta = 0.03, gamma = 0.06, initial_infected = 1, vax_eff = 0, vax_fraction = 0)
         run.results()
 
 
