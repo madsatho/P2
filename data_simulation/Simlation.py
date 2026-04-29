@@ -33,7 +33,7 @@ class simulation:
 #-----------------------------------------------------------------------------------------
 
 class SIR:
-    def __init__(self, Graph, target, nodes, beta = 0.3, gamma = 0.1, initial_infected = 1, vax_eff = 0.0, vax_fraction = 0.00):
+    def __init__(self, Graph, target, nodes, beta, gamma, initial_infected, vax_eff, vax_fraction):
         self.graph = Graph
         self.target = target
         self.nodes = list(nodes)
@@ -109,7 +109,7 @@ class SIR:
 #"network_0_T13370.txt"
 
 class run_SIR_Simulation:
-    def __init__(self,network, beta = 0.3, gamma = 0.1, initial_infected = 1, vax_eff = 0.0, vax_fraction = 0.00):
+    def __init__(self,network, beta = 0.3, gamma = 0.1, initial_infected = 1, vax_eff = 0.99, vax_fraction = 0.2):
         self.network = network
         self.path = os.path.join("..","MetaData(csv og txt)","networks", network)
         self.G = nx.read_edgelist(self.path)
@@ -125,7 +125,7 @@ class run_SIR_Simulation:
         top = []
 
         for i in range(30):
-            sir = SIR(Graph=self.G, target=target, nodes=self.nodes, beta=self.beta, gamma=self.gamma, initial_infected=self.initial_infected)
+            sir = SIR(Graph=self.G, target=target, nodes=self.nodes, beta=self.beta, gamma=self.gamma, initial_infected=self.initial_infected, vax_eff=self.vax_eff, vax_fraction=self.vax_fraction)
 
             if mode == "targeted":
                 history = sir.SIR_sim(vacc_strategy="targeted")
@@ -179,7 +179,7 @@ class SimSandBox:
         self.nodes = self.G.nodes()
 
     def SandBox(self):
-        run = run_SIR_Simulation(self.network,beta = 0.03, gamma = 0.06, initial_infected = 1, vax_eff = 0, vax_fraction = 0)
+        run = run_SIR_Simulation(self.network,beta = 0.03, gamma = 0.06, initial_infected = 1, vax_eff = 0, vax_fraction = 0.0)
         run.results()
 
 
