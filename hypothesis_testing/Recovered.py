@@ -144,7 +144,7 @@ class run_SIR_Simulation:
 
         return top
 
-    def results(self, Save=False):
+    def results(self, Save=True):
         sim = simulation(self.G, self.nodes, self.network)
 
         strategies = {
@@ -164,7 +164,7 @@ class run_SIR_Simulation:
 
         df = pd.DataFrame(results)
         if Save:
-            df.to_csv(f"SIR_results_{self.network}.csv", index=False)
+            df.to_csv(f"Total_amount_infected{self.network}.csv", index=False)
         print(df.describe().drop("count").T)
         df.boxplot()
         plt.xticks(rotation=45, ha='right')
@@ -180,7 +180,7 @@ class SimSandBox:
         self.nodes = self.G.nodes()
 
     def SandBox(self):
-        run = run_SIR_Simulation(self.network,beta = 0.02, gamma = 0.01, initial_infected = 1, vax_eff = 0.95, vax_fraction = 0.017)
+        run = run_SIR_Simulation(self.network,beta = 0.02, gamma = 0.1, initial_infected = 1, vax_eff = 0.95, vax_fraction = 0.017)
         run.results()
 
 
