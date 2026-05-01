@@ -178,7 +178,7 @@ class run_SIR_Simulation:
             df["RandomVaccination"],
             df["NoVaccination"])
 
-        print(f"p-value: {round(hyp_test[1],5)} \n Hypothesis test: {round(hyp_test[0],5)}")
+        print(f"p-value: {round(hyp_test[1],6)} \n Hypothesis test: {round(hyp_test[0],5)}")
 
 #--------------------------------------------------------------------------------------------------
 
