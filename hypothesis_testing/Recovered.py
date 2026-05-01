@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 import random
+from scipy import stats
 
 
 class simulation:
@@ -164,11 +165,20 @@ class run_SIR_Simulation:
 
         df = pd.DataFrame(results)
         if Save:
-            df.to_csv(f"Total_amount_infected{self.network}.csv", index=False)
+            df.to_csv(f"Total_amount_infected_{self.network}.csv", index=False)
         print(df.describe().drop("count").T)
-        df.boxplot()
-        plt.xticks(rotation=45, ha='right')
-        plt.show()
+        #df.boxplot()
+        #plt.xticks(rotation=45, ha='right')
+        #plt.show()
+
+        hyp_test = stats.kruskal( #Laver vores kruskal test. Output er en tuple
+            df["DegreeTargeted"],
+            df["BetweennessTargeted"],
+            df["PageRankTargeted"],
+            df["RandomVaccination"],
+            df["NoVaccination"])
+
+        print(f"p-value: {round(hyp_test[1],5)} \n Hypothesis test: {round(hyp_test[0],5)}")
 
 #--------------------------------------------------------------------------------------------------
 
