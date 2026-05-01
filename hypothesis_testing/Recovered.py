@@ -136,8 +136,8 @@ class run_SIR_Simulation:
             else:
                 raise ValueError("Invalid mode")
 
-            I = [state[1] for state in history]
-            top.append(max(I))
+            R = [state[2] for state in history]
+            top.append(max(R))
 
             if i % 10 == 0:
                 print(f"simulation {i}")
@@ -180,7 +180,7 @@ class SimSandBox:
         self.nodes = self.G.nodes()
 
     def SandBox(self):
-        run = run_SIR_Simulation(self.network,beta = 0.03, gamma = 0.06, initial_infected = 1, vax_eff = 0, vax_fraction = 0.0)
+        run = run_SIR_Simulation(self.network,beta = 0.02, gamma = 0.01, initial_infected = 1, vax_eff = 0.95, vax_fraction = 0.017)
         run.results()
 
 
