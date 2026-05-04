@@ -4,7 +4,6 @@ import pandas as pd
 import os
 import random
 from scipy import stats
-from itertools import combinations
 
 
 class simulation:
