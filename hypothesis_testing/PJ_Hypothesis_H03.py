@@ -26,13 +26,13 @@ def one_sided_test():
     # Læs data
     df = pd.read_csv(file_path)
 
-    x = df["NoVaccination"]
-    y = df["RandomVaccination"]
+    x = df["PageRankTargeted"]
+    y = df["BetweennessTargeted"]
 
-    res = stats.ttest_ind(x, y, alternative="greater")
+    res = stats.ttest_ind(x, y, alternative="two-sided")
 
-    print("\nH0: mu_0 <= mu_random")
-    print("H1: mu_0 > mu_random")
+    print("\nH0: mu_PR = mu_BC")
+    print("H1: mu_PR not = mu_BC")
     print(f"t = {res.statistic:.4f}")
     print(f"p = {res.pvalue:.4f}")
 
