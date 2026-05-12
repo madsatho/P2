@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 import random
-from scipy import stats
 
 
 class simulation:
@@ -16,6 +15,7 @@ class simulation:
     def finde_Vax_target(self, NumNeighbors=False, Betweenness=False, PageRank=False):
         stat_location=os.path.join("..", "MetaData(csv og txt)",f"Stat_{self.graph_id}.csv")
         df = pd.read_csv(stat_location)
+
 
         if NumNeighbors:
             sorted_df = df.sort_values(by="NumNeighbors", ascending=False)
@@ -49,6 +49,7 @@ class SIR:
         for node in infected:
             state[node] = "I"
         return state
+
 
     def is_infected(self, state):
         if any(node == "I" for node in state.values()):
@@ -105,6 +106,7 @@ class SIR:
 
 
 #-----------------------------------------------------------------------------------------------------
+#"network_0_T13370.txt"
 
 class run_SIR_Simulation:
     def __init__(self,network, beta = 0.3, gamma = 0.1, initial_infected = 1, vax_eff = 0.99, vax_fraction = 0.2):
@@ -117,6 +119,7 @@ class run_SIR_Simulation:
         self.initial_infected = initial_infected
         self.vax_eff = vax_eff
         self.vax_fraction = vax_fraction
+
 
     def run_simulation(self, target=None, mode="targeted"):
         top = []
@@ -133,19 +136,13 @@ class run_SIR_Simulation:
             else:
                 raise ValueError("Invalid mode")
 
-            top.append(len(history))  # Last time step = epidemic duration
+            I = [state[1] for state in history]
+            top.append(max(I))
 
             if i % 10 == 0:
                 print(f"simulation {i}")
 
         return top
-
-    def hypothesis_test(self, df):
-        print("\nKruskal-Wallis test (duration):")
-        groups = [df[col].values for col in df.columns]
-        _, p = stats.kruskal(*groups)
-        print(f"  p = {p:.4f}")
-
 
     def results(self, Save=False):
         sim = simulation(self.G, self.nodes, self.network)
@@ -164,14 +161,14 @@ class run_SIR_Simulation:
             print(f"Running {name}")
             results[name] = self.run_simulation(target=target, mode=mode)
 
+
         df = pd.DataFrame(results)
         if Save:
             df.to_csv(f"SIR_results_{self.network}.csv", index=False)
         print(df.describe().drop("count").T)
-        self.hypothesis_test(df)
         df.boxplot()
         plt.show()
-
+        return df
 #--------------------------------------------------------------------------------------------------
 
 class SimSandBox:
@@ -182,9 +179,23 @@ class SimSandBox:
         self.nodes = self.G.nodes()
 
     def SandBox(self):
-        run = run_SIR_Simulation(self.network,beta = 0.03, gamma = 0.06, initial_infected = 1, vax_eff = 0.99, vax_fraction = 0.017)
-        run.results()
-
+        run = run_SIR_Simulation(self.network,beta=0.02,gamma=0.01,initial_infected=1,vax_eff=0.95,vax_fraction=0.017)
+        df = run.results()
+        return df
 
 box = SimSandBox("network_0_T13370.txt")
-box.SandBox()
+df = box.SandBox()
+from scipy.stats import kruskal
+print("RUNNING KRUSKAL NOW")
+
+h_stat, p = kruskal(
+    df["DegreeTargeted"],
+    df["BetweennessTargeted"],
+    df["PageRankTargeted"],
+    df["RandomVaccination"],
+    df["NoVaccination"]
+)
+
+print("Global test:")
+print(h_stat)
+print(p)
