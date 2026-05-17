@@ -125,7 +125,7 @@ class run_SIR_Simulation:
     def run_simulation(self, target=None, mode="targeted"):
         top = []
 
-        for i in range(30):
+        for i in range(10):
             sir = SIR(Graph=self.G, target=target, nodes=self.nodes, beta=self.beta, gamma=self.gamma, initial_infected=self.initial_infected, vax_eff=self.vax_eff, vax_fraction=self.vax_fraction)
 
             if mode == "targeted":
@@ -197,9 +197,9 @@ class SimSandBox:
         p_value = run.results()
 
         beta_dict = {0:p_value}
-        for i in range(9):
+        for i in range(19):
             run_id=i+1
-            x += 0.1
+            x += 0.05
             run = run_SIR_Simulation(self.network, beta=0.2, gamma=0.2, initial_infected=5, vax_eff=0.95,vax_fraction=x)
             new_p = run.results()
             beta_dict[run_id]=new_p
@@ -209,8 +209,11 @@ class SimSandBox:
 box = SimSandBox("network_0_T13370.txt")
 test=box.SandBox()
 
+print(len(box.nodes))
+
+print("\n Here are the results:\n")
 for i in test:
-    print(round(test[i],6))
+    print(f"Test {i}:{round(test[i],5)}")
 
 
 
