@@ -13,9 +13,9 @@ class simulation:
         self.n        =  int(0.05 * len(nodes))
 
     def finde_Vax_target(self, NumNeighbors=False, Betweenness=False, PageRank=False):
-        df = pd.read_csv(f"Stat_{self.graph_id}.csv")
+        stat_location=os.path.join("..", "MetaData(csv og txt)",f"Stat_{self.graph_id}.csv")
 
-        n = int(0.05 * len(self.nodes))
+        df = pd.read_csv(stat_location)
 
         if NumNeighbors:
             sorted_df = df.sort_values(by="NumNeighbors", ascending=False)
@@ -26,7 +26,7 @@ class simulation:
         else:
             raise ValueError("Choose a method")
 
-        top_nodes = sorted_df.head(n)["Node"].tolist()
+        top_nodes = sorted_df.head(self.n)["Node"].tolist()
 
         return top_nodes
 
@@ -109,9 +109,9 @@ class SIR:
 #"network_0_T13370.txt"
 
 class run_SIR_Simulation:
-    def __init__(self,network, beta = 0.3, gamma = 0.1, initial_infected = 1, vax_eff = 0.999, vax_fraction = 0.05):
+    def __init__(self,network, beta = 0.0, gamma = 0.0, initial_infected = 3, vax_eff = 0.0, vax_fraction = 0.00):
         self.network = network
-        self.path = os.path.join("networks", network)
+        self.path = os.path.join("..", "MetaData(csv og txt)", "networks", network)
         self.G = nx.read_edgelist(self.path)
         self.nodes = self.G.nodes()
         self.beta = beta
@@ -125,7 +125,7 @@ class run_SIR_Simulation:
         top = []
 
         for i in range(30):
-            sir = SIR(Graph=self.G, target=target, nodes=self.nodes, beta=self.beta, gamma=self.gamma, initial_infected=self.initial_infected)
+            sir = SIR(Graph=self.G, target=target, nodes=self.nodes, beta=self.beta, gamma=self.gamma, initial_infected=self.initial_infected, vax_eff=self.vax_eff, vax_fraction=self.vax_fraction)
 
             if mode == "targeted":
                 history = sir.SIR_sim(vacc_strategy="targeted")
@@ -175,33 +175,38 @@ class run_SIR_Simulation:
 class SimSandBox:
     def __init__(self, network):
         self.network = network
-        self.path = os.path.join("networks", network)
+        self.path = os.path.join("..", "MetaData(csv og txt)", "networks", network)
         self.G = nx.read_edgelist(self.path)
         self.nodes = self.G.nodes()
 
     def SandBox(self):
-        x=0
-        run = run_SIR_Simulation(self.network, beta=0, gamma=0.2, initial_infected=5, vax_eff=0.95, vax_fraction=0.05)
+        x_value=0
+        x_change=0.025
+        loop_count=20
+
+        run = run_SIR_Simulation(self.network, beta=0, gamma=0.1, initial_infected=5, vax_eff=0.95, vax_fraction=0.017)
+
         beta_dict = {k: [v] for k, v in run.results().items()}
-        for i in range(10):
-            x += 0.05
-            run = run_SIR_Simulation(self.network, beta=x, gamma=0.2, initial_infected=5, vax_eff=0.95,vax_fraction=0.05)
+        for i in range(loop_count):
+            x_value += x_change
+            run = run_SIR_Simulation(self.network, beta=x_value, gamma=0.1, initial_infected=5, vax_eff=0.95,vax_fraction=0.017)
             new_results = run.results()
 
             for k in beta_dict:
                 beta_dict[k].append(new_results[k])
-        return beta_dict
+
+        vars = [x_change * i for i in range(loop_count + 1)]
+
+
+        linestyles = ["-", "--", "-.", ":", (0, (3, 1, 1, 1)), (0, (5, 1))]
+        for i, (strategy, values) in enumerate(beta_dict.items()):
+            plt.plot(vars, values, label=strategy, color="black", linestyle=linestyles[i])
+
+        plt.legend()
+        plt.xlabel("Beta")
+        plt.ylabel("Mean peak infections")
+        plt.show()
+
+
 box = SimSandBox("network_0_T13370.txt")
 test=box.SandBox()
-print(test)
-
-
-betas = [0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45,0.5]
-
-for strategy, values in test.items():
-    plt.plot(betas, values, label=strategy)
-
-plt.legend()
-plt.xlabel("Beta")
-plt.ylabel("Mean peak infections")
-plt.show()

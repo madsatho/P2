@@ -205,7 +205,6 @@ class SimSandBox:
             beta_dict[run_id]=new_p
         return beta_dict
 
-
 box = SimSandBox("network_0_T13370.txt")
 test=box.SandBox()
 
