@@ -14,7 +14,6 @@ class simulation:
 
     def finde_Vax_target(self, NumNeighbors=False, Betweenness=False, PageRank=False):
         stat_location=os.path.join("..", "MetaData(csv og txt)",f"Stat_{self.graph_id}.csv")
-
         df = pd.read_csv(stat_location)
 
         if NumNeighbors:
@@ -26,14 +25,14 @@ class simulation:
         else:
             raise ValueError("Choose a method")
 
-        top_nodes = sorted_df.head(self.n)["Node"].tolist()
+        top_nodes = sorted_df["Node"].tolist()
 
         return top_nodes
 
 #-----------------------------------------------------------------------------------------
 
 class SIR:
-    def __init__(self, Graph, target, nodes, beta = 0.3, gamma = 0.1, initial_infected = 1, vax_eff = 0.999, vax_fraction = 0.05):
+    def __init__(self, Graph, target, nodes, beta, gamma, initial_infected, vax_eff, vax_fraction):
         self.graph = Graph
         self.target = target
         self.nodes = list(nodes)
@@ -64,7 +63,7 @@ class SIR:
         if vacc_strategy == "random":
             targets = set(random.sample(self.nodes, n))
         elif vacc_strategy == "targeted":
-            targets = set(self.target)
+            targets = set(self.target[:n])
         else:
             targets = set()
 
@@ -180,16 +179,16 @@ class SimSandBox:
         self.nodes = self.G.nodes()
 
     def SandBox(self):
-        x_value=0
-        x_change=0.025
-        loop_count=20
+        x=0.05
+        x_change=0.05
+        loop_count=10
 
-        run = run_SIR_Simulation(self.network, beta=0, gamma=0.1, initial_infected=5, vax_eff=0.95, vax_fraction=0.017)
+        run = run_SIR_Simulation(self.network, beta=0.2, gamma=x, initial_infected=5, vax_eff=0.95, vax_fraction=0.017)
 
         beta_dict = {k: [v] for k, v in run.results().items()}
         for i in range(loop_count):
-            x_value += x_change
-            run = run_SIR_Simulation(self.network, beta=x_value, gamma=0.1, initial_infected=5, vax_eff=0.95,vax_fraction=0.017)
+            x += x_change
+            run = run_SIR_Simulation(self.network, beta=0.2, gamma=x, initial_infected=5, vax_eff=0.95,vax_fraction=0.017)
             new_results = run.results()
 
             for k in beta_dict:
@@ -197,13 +196,12 @@ class SimSandBox:
 
         vars = [x_change * i for i in range(loop_count + 1)]
 
-
         linestyles = ["-", "--", "-.", ":", (0, (3, 1, 1, 1)), (0, (5, 1))]
         for i, (strategy, values) in enumerate(beta_dict.items()):
             plt.plot(vars, values, label=strategy, color="black", linestyle=linestyles[i])
 
         plt.legend()
-        plt.xlabel("Beta")
+        plt.xlabel("Gamma")
         plt.ylabel("Mean peak infections")
         plt.show()
 
