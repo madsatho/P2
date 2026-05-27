@@ -144,15 +144,15 @@ class run_SIR_Simulation:
 
         return top
 
-    def results(self, Save=False):
+    def results(self, Save=True):
         sim = simulation(self.G, self.nodes, self.network)
 
         strategies = {
-            "Degree": ("targeted", sim.finde_Vax_target(NumNeighbors=True)),
-            "Betweenness": ("targeted", sim.finde_Vax_target(Betweenness=True)),
-            "PageRank": ("targeted", sim.finde_Vax_target(PageRank=True)),
-            "RandomVac": ("random", []),
-            "NoVac": ("none", [])
+            "DegreeTargeted": ("targeted", sim.finde_Vax_target(NumNeighbors=True)),
+            "BetweennessTargeted": ("targeted", sim.finde_Vax_target(Betweenness=True)),
+            "PageRankTargeted": ("targeted", sim.finde_Vax_target(PageRank=True)),
+            "RandomVaccination": ("random", []),
+            "NoVaccination": ("none", [])
         }
 
         results = {}

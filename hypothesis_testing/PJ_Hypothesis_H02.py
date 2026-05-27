@@ -29,12 +29,12 @@ def one_sided_test():
     x = df["NoVaccination"]
     y = df["RandomVaccination"]
 
-    res = stats.ttest_ind(x, y, alternative="greater")
+    res = stats.wilcoxon(x, y, alternative="two-sided")
 
-    print("\nH0: mu_0 <= mu_random")
-    print("H1: mu_0 > mu_random")
-    print(f"t = {res.statistic:.4f}")
-    print(f"p = {res.pvalue:.4f}")
+    print("\nH0: mu_0 = mu_random")
+    print("H1: mu_0 not = mu_random")
+    print(f"t = {res[0]:.4f}")
+    print(f"p = {res[1]:.4f}")
 
 
 if __name__ == "__main__":
