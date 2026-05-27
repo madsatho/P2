@@ -186,8 +186,7 @@ class SimSandBox:
 box = SimSandBox("network_0_T13370.txt")
 box.SandBox()
 
-l=len(box.nodes)
-print(l)
+print(len(box.nodes))
 
 
 
