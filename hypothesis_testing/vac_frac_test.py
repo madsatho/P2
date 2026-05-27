@@ -149,11 +149,11 @@ class run_SIR_Simulation:
         sim = simulation(self.G, self.nodes, self.network)
 
         strategies = {
-            "DegreeTargeted": ("targeted", sim.finde_Vax_target(NumNeighbors=True)),
-            "BetweennessTargeted": ("targeted", sim.finde_Vax_target(Betweenness=True)),
-            "PageRankTargeted": ("targeted", sim.finde_Vax_target(PageRank=True)),
-            "RandomVaccination": ("random", []),
-            "NoVaccination": ("none", [])
+            "Degree": ("targeted", sim.finde_Vax_target(NumNeighbors=True)),
+            "Betweenness": ("targeted", sim.finde_Vax_target(Betweenness=True)),
+            "PageRank": ("targeted", sim.finde_Vax_target(PageRank=True)),
+            "RandomVac": ("random", []),
+            "NoVac": ("none", [])
         }
 
         results = {}
@@ -164,22 +164,22 @@ class run_SIR_Simulation:
 
 
         df = pd.DataFrame(results)
-        #if Save:
-        #    df.to_csv(f"SIR_results_{self.network}.csv", index=False)
-        #print(df.describe().drop("count").T)
-        #df.boxplot()
-        #plt.show()
+        if Save:
+            df.to_csv(f"SIR_results_{self.network}.csv", index=False)
+        print(df.describe().drop("count").T)
+        df.boxplot()
+        plt.show()
 
-        hyp_test = stats.kruskal( #Laver vores kruskal test. Output er en tuple
-            df["DegreeTargeted"],
-            df["BetweennessTargeted"],
-            df["PageRankTargeted"],
-            df["RandomVaccination"],
-            #df["NoVaccination"]
-            )
+        #hyp_test = stats.kruskal( #Laver vores kruskal test. Output er en tuple
+         #   df["DegreeTargeted"],
+        #  df["BetweennessTargeted"],
+        #  df["PageRankTargeted"],
+        #  df["RandomVaccination"],
+        #  #df["NoVaccination"]
+        #  )
 
-        print(f"p-value: {round(hyp_test[1],6)} \n Hypothesis test: {round(hyp_test[0],5)}")
-        return hyp_test[1]
+        #print(f"p-value: {round(hyp_test[1],6)} \n Hypothesis test: {round(hyp_test[0],5)}")
+        #return hyp_test[1]
 
 #--------------------------------------------------------------------------------------------------
 
@@ -192,7 +192,7 @@ class SimSandBox:
 
     def SandBox(self):
         x = 0
-        run = run_SIR_Simulation(self.network, beta=0.2, gamma=0.2, initial_infected=5, vax_eff=0.95, vax_fraction=0.00)
+        run = run_SIR_Simulation(self.network, beta=0.2, gamma=0.1, initial_infected=5, vax_eff=0.95, vax_fraction=0.00)
 
         p_value = run.results()
 

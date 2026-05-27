@@ -148,11 +148,11 @@ class run_SIR_Simulation:
         sim = simulation(self.G, self.nodes, self.network)
 
         strategies = {
-            "DegreeTargeted": ("targeted", sim.finde_Vax_target(NumNeighbors=True)),
-            "BetweennessTargeted": ("targeted", sim.finde_Vax_target(Betweenness=True)),
-            "PageRankTargeted": ("targeted", sim.finde_Vax_target(PageRank=True)),
-            "RandomVaccination": ("random", []),
-            "NoVaccination": ("none", [])
+            "Degree": ("targeted", sim.finde_Vax_target(NumNeighbors=True)),
+            "Betweenness": ("targeted", sim.finde_Vax_target(Betweenness=True)),
+            "PageRank": ("targeted", sim.finde_Vax_target(PageRank=True)),
+            "RandomVac": ("random", []),
+            "NoVac": ("none", [])
         }
 
         results = {}
@@ -179,7 +179,7 @@ class SimSandBox:
         self.nodes = self.G.nodes()
 
     def SandBox(self):
-        run = run_SIR_Simulation(self.network,beta = 0.03, gamma = 0.06, initial_infected = 1, vax_eff = 0, vax_fraction = 0.0)
+        run = run_SIR_Simulation(self.network,beta = 0.2, gamma = 0.1, initial_infected = 5, vax_eff = 0.95, vax_fraction = 0.017)
         run.results()
 
 
