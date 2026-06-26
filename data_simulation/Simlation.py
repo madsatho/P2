@@ -71,12 +71,16 @@ class SIR:
         for node in targets:
             state[node] = "V"
 
+
         state = self.random_infected(state, self.initial_infected)
 
         history = []
         counter = 0
+        i = 2
 
         while self.is_infected(state):
+
+
             new_state = state.copy()
 
             for node in self.graph.nodes():
@@ -90,6 +94,21 @@ class SIR:
 
                     if random.random() < self.gamma:
                         new_state[node] = "R"
+
+            if vacc_strategy == "targeted":
+                targets = set(self.target[(i-1)*n:i*n])
+                i=i+1
+                for node in targets:
+                    if state[node] == "S":
+                        new_state[node] = "V"
+
+
+            if vacc_strategy == "random":
+                targets = set(random.sample(self.nodes, n))
+                for node in targets:
+                    if state[node] == "S":
+                        new_state[node] = "V"
+
 
             state = new_state
 
@@ -186,7 +205,7 @@ class SimSandBox:
 box = SimSandBox("network_0_T13370.txt")
 box.SandBox()
 
-print(len(box.nodes))
+#print(len(box.nodes))
 
 
 
